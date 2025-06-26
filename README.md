@@ -1,63 +1,159 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=19858681&assignment_repo_type=AssignmentRepo)
+
 # Express.js RESTful API Assignment
 
-This assignment focuses on building a RESTful API using Express.js, implementing proper routing, middleware, and error handling.
+## Overview
+This project is a RESTful API for managing products, built with Express.js. It demonstrates CRUD operations, routing, middleware, error handling, and advanced features like filtering, pagination, search, and statistics.
 
-## Assignment Overview
+## Features
+- CRUD operations for products
+- Middleware for logging, authentication, and validation
+- Global error handling with custom error classes
+- Filtering, pagination, search, and statistics endpoints
 
-You will:
-1. Set up an Express.js server
-2. Create RESTful API routes for a product resource
-3. Implement custom middleware for logging, authentication, and validation
-4. Add comprehensive error handling
-5. Develop advanced features like filtering, pagination, and search
-
-## Getting Started
-
-1. Accept the GitHub Classroom assignment invitation
-2. Clone your personal repository that was created by GitHub Classroom
-3. Install dependencies:
-   ```
+## Setup
+1. **Install dependencies:**
+   ```bash
    npm install
    ```
-4. Run the server:
-   ```
+2. **Start the server:**
+   ```bash
    npm start
    ```
+   The server runs on [http://localhost:3000](http://localhost:3000) by default.
 
-## Files Included
+## Environment Variables
+Copy `.env.example` to `.env` and set your environment variables as needed. For this demo, the API key is hardcoded as `mysecretkey`.
 
-- `Week2-Assignment.md`: Detailed assignment instructions
-- `server.js`: Starter Express.js server file
-- `.env.example`: Example environment variables file
+## Middleware
+- **Logger:** Logs request method, URL, and timestamp.
+- **Authentication:** Requires `x-api-key` header for all `/api` routes.
+- **Validation:** Validates product data for POST and PUT requests.
 
-## Requirements
-
-- Node.js (v18 or higher)
-- npm or yarn
-- Postman, Insomnia, or curl for API testing
+## Error Handling
+- Custom error classes: `NotFoundError`, `ValidationError`
+- Global error handler returns JSON with status code and message
 
 ## API Endpoints
 
-The API will have the following endpoints:
+### Authentication
+All `/api` routes require the header:
+```
+x-api-key: mysecretkey
+```
 
-- `GET /api/products`: Get all products
-- `GET /api/products/:id`: Get a specific product
-- `POST /api/products`: Create a new product
-- `PUT /api/products/:id`: Update a product
-- `DELETE /api/products/:id`: Delete a product
+### Product Endpoints
 
-## Submission
+#### List Products (with filtering & pagination)
+- **GET** `/api/products`
+- **Query Params:**
+  - `category` (optional): filter by category
+  - `page` (optional): page number (default 1)
+  - `limit` (optional): items per page (default: all)
+- **Example:**
+  ```bash
+  curl -H "x-api-key: mysecretkey" "http://localhost:3000/api/products?category=electronics&page=1&limit=2"
+  ```
+- **Response:**
+  ```json
+  {
+    "total": 2,
+    "page": 1,
+    "limit": 2,
+    "products": [
+      { "id": "1", "name": "Laptop", ... },
+      { "id": "2", "name": "Smartphone", ... }
+    ]
+  }
+  ```
 
-Your work will be automatically submitted when you push to your GitHub Classroom repository. Make sure to:
+#### Get Product by ID
+- **GET** `/api/products/:id`
+- **Example:**
+  ```bash
+  curl -H "x-api-key: mysecretkey" http://localhost:3000/api/products/1
+  ```
 
-1. Complete all the required API endpoints
-2. Implement the middleware and error handling
-3. Document your API in the README.md
-4. Include examples of requests and responses
+#### Create Product
+- **POST** `/api/products`
+- **Body:**
+  ```json
+  {
+    "name": "Tablet",
+    "description": "10-inch display",
+    "price": 300,
+    "category": "electronics",
+    "inStock": true
+  }
+  ```
+- **Example:**
+  ```bash
+  curl -X POST -H "Content-Type: application/json" -H "x-api-key: mysecretkey" -d '{"name":"Tablet","description":"10-inch display","price":300,"category":"electronics","inStock":true}' http://localhost:3000/api/products
+  ```
 
-## Resources
+#### Update Product
+- **PUT** `/api/products/:id`
+- **Body:** Same as create
 
-- [Express.js Documentation](https://expressjs.com/)
-- [RESTful API Design Best Practices](https://restfulapi.net/)
-- [HTTP Status Codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 
+#### Delete Product
+- **DELETE** `/api/products/:id`
+
+#### Search Products by Name
+- **GET** `/api/products/search?name=lap`
+- **Example:**
+  ```bash
+  curl -H "x-api-key: mysecretkey" "http://localhost:3000/api/products/search?name=lap"
+  ```
+
+#### Product Statistics
+- **GET** `/api/products/stats`
+- **Example:**
+  ```bash
+  curl -H "x-api-key: mysecretkey" http://localhost:3000/api/products/stats
+  ```
+- **Response:**
+  ```json
+  {
+    "electronics": 2,
+    "kitchen": 1
+  }
+  ```
+
+## Error Responses
+- **404 Not Found:**
+  ```json
+  { "error": "NotFoundError", "message": "Product not found" }
+  ```
+- **400 Validation Error:**
+  ```json
+  { "error": "ValidationError", "message": "Invalid product data" }
+  ```
+- **401 Unauthorized:**
+  ```json
+  { "error": "Error", "message": "Unauthorized: Invalid or missing API key" }
+  ```
+
+## Project Structure
+```
+.
+├── controllers/
+├── errors/
+│   ├── NotFoundError.js
+│   └── ValidationError.js
+├── middleware/
+│   ├── auth.js
+│   ├── errorHandler.js
+│   ├── logger.js
+│   └── validateProduct.js
+├── routes/
+│   └── products.js
+├── utils/
+├── server.js
+├── README.md
+├── .env.example
+└── Week2-Assignment.md
+```
+
+## Notes
+- All data is stored in-memory (no database).
+- For testing, use Postman, Insomnia, or curl.
+- See `Week2-Assignment.md` for full assignment details. 
